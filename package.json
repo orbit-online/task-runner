@@ -1,0 +1,38 @@
+{
+    "name": "@orbit-online/create-task-runner",
+    "bin": {
+        "create-task-runner": "./bin/install-task-runner.sh",
+        "orb": "./bin/orbit-task-runner.sh"
+    },
+    "version": "1.0.0",
+    "description": "Generic CLI task runner, find and run local project tasks / tools easily",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/orbit-online/create-task-runner.git"
+    },
+    "keywords": [
+        "command-line",
+        "command line",
+        "cli",
+        "runner",
+        "task",
+        "tool"
+    ],
+    "author": {
+        "name": "Orbit Online A/S",
+        "email": "opensource@orbit.online",
+        "url": "https://github.com/orbit-online"
+    },
+    "contributors": [
+        {
+            "email": "briankchristensen@gmail.com",
+            "name": "Brian Kejlberg",
+            "url": "https://github.com/thetrompf"
+        }
+    ],
+    "bugs": {
+        "url": "https://github.com/orbit-online/create-task-runner/issues"
+    },
+    "homepage": "https://github.com/orbit-online/create-task-runner#readme"
+}
