@@ -62,7 +62,7 @@ $ yarn create @orbit-online/task-runner [TASK RUNNER NAME]
 Put in the name of the executable you want available in place of `[TASK RUNNER NAME]`.
 if omitted the name `orb` will be used, other popular names are `dev` or `run`.
 
-The default installation prefix is `/usr/local/bin` this be modified by setting
+The default installation prefix is `/usr/local/bin` this can be modified by setting
 the `ORB_INSTALL_PREFIX` environment variable.
 
 ### Configuration
@@ -72,7 +72,7 @@ of you project.
 
 The project path can be configured via `PROJECT_PATH` or `ORB_PROJECT_PATH`
 variables. `ORB_PROJECT_PATH` takes precedence over `PROJECT_PATH`.
-However if no project path is configured, `orb` will try make a guess where your project root is located.
+However if no project path is configured, `orb` will try guess where your project root is located.
 
 | Environment variable   | Default value                                                                                                                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | :--------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
