@@ -1,5 +1,5 @@
 {
-    "name": "@orbit-online/create-task-runner",
+    "name": "@orbit-online/task-runner-builder",
     "bin": {
         "create-task-runner": "./bin/install-task-runner.sh",
         "orb": "./bin/orbit-task-runner.sh"
@@ -9,7 +9,7 @@
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/orbit-online/create-task-runner.git"
+        "url": "git+https://github.com/orbit-online/task-runner.git"
     },
     "keywords": [
         "command-line",
@@ -32,7 +32,15 @@
         }
     ],
     "bugs": {
-        "url": "https://github.com/orbit-online/create-task-runner/issues"
+        "url": "https://github.com/orbit-online/task-runner/issues"
     },
-    "homepage": "https://github.com/orbit-online/create-task-runner#readme"
+    "homepage": "https://github.com/orbit-online/task-runner#readme",
+    "devDependencies": {
+        "@orbit-online/create-task-runner": "^1.1.3",
+        "@orbit-online/task-runner": "^1.1.0"
+    },
+    "dependencies": {
+        "@orbit-online/task-runner": "1.0.0"
+    },
+    "private": true
 }

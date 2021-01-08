@@ -10,7 +10,7 @@ install_orb() {
         install_cmd+=( "sudo" )
     fi
 
-    task_runner_path="$(realpath "$(dirname "${BASH_SOURCE[0]}")/orb")"
+    task_runner_path="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../node_modules/.bin/orb")"
     install_cmd+=( "cp" "$task_runner_path" "$prefix/$task_runner_name" )
 
     if (
