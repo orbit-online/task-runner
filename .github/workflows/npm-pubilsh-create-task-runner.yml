@@ -16,6 +16,5 @@ jobs:
       with:
         access: public
         check-version: false
-        dry-run: true
         package: ./packages/create-task-runner/package.json
         token: ${{ secrets.NPM_TOKEN }}
