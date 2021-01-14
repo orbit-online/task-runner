@@ -3,7 +3,7 @@
 on:
   push:
     tags:
-    - v*-create-task-runner
+    - 'v*-create-task-runner'
 
 jobs:
   publish-create-task-runner:
