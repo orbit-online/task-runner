@@ -1,0 +1,20 @@
+---
+
+on:
+  push:
+    tags:
+    - v*-task-runner
+
+jobs:
+  publish-task-runner:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+    - run: ./scripts/build.sh
+    - uses: JS-DevTools/npm-publish@v1
+      with:
+        access: public
+        check-version: false
+        package: ./packages/task-runner/package.json
+        token: ${{ secrets.NPM_TOKEN }}
