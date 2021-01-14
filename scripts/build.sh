@@ -2,6 +2,11 @@
 
 set -e
 
+if ! type jq &> /dev/null; then
+    printf -- 'Missing dependency jq, to install it run the following:\n\nsudo apt install jq\n' >&2
+    exit 1
+fi
+
 PROJECT_PATH=$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 build-create-task-runner() {
