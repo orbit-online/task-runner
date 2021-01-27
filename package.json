@@ -37,6 +37,7 @@
     "homepage": "https://github.com/orbit-online/task-runner#readme",
     "devDependencies": {
         "@orbit-online/create-task-runner": "^1.2.1",
+        "@orbit-online/package-version": "^1.0.0",
         "@orbit-online/task-runner": "^1.0.1"
     },
     "dependencies": {
