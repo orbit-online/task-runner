@@ -38,10 +38,10 @@
     "devDependencies": {
         "@orbit-online/create-task-runner": "^1.2.1",
         "@orbit-online/package-version": "^1.2.1",
-        "@orbit-online/task-runner": "^1.0.1"
+        "@orbit-online/task-runner": "^1.1.0"
     },
     "dependencies": {
-        "@orbit-online/task-runner": "1.0.1"
+        "@orbit-online/task-runner": "1.1.0"
     },
     "private": true
 }
