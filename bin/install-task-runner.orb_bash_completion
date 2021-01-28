@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -n "$_ORB_BASH_COMPLETION" ]; then
+    _exec_orb_bash_completion() {
+        if [ "$COMP_CWORD" -eq "2" ]; then
+            COMPREPLY=("orb")
+        fi
+        return 0
+    }
+fi
