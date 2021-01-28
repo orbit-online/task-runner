@@ -1,7 +1,10 @@
 #!/bin/bash
 
 install_orb() {
-    local install_cmd=() task_runner_path task_runner_name=${1:-orb} prefix=${ORB_INSTALL_PREFIX:-/usr/local/bin}
+    local install_cmd=() task_runner_path task_runner_name=${1:-orb} \
+          task_runner_basename task_runner_dir task_runner_filename
+          prefix=${ORB_INSTALL_PREFIX:-/usr/local/bin}
+
     if [[ ! -d $prefix ]]; then
         printf -- '%s is not a directory choose different install prefix by setting the ORB_INSTALL_PREFIX environment variable\n' "$prefix" >&2
         exit 1
@@ -12,6 +15,17 @@ install_orb() {
 
     task_runner_path="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../node_modules/.bin/orb")"
     install_cmd+=( "cp" "$task_runner_path" "$prefix/$task_runner_name" )
+    if [ -d /etc/bash_completion.d/ ]; then
+        task_runner_dir="$(dirname "$task_runner_path")"
+        task_runner_basename="$(basename "$task_runner_path")"
+        task_runner_filename="${task_runner_basename%.*}"
+
+        if [ ! -w /etc/bash_completion.d/ ]; then
+            sudo cp "${task_runner_dir}/${task_runner_filename}.bash_completion" /etc/bash_completion.d/orb_completion &> /dev/null || true
+        else
+            cp "${task_runner_dir}/${task_runner_filename}.bash_completion" /etc/bash_completion.d/orb_completion &> /dev/null || true
+        fi
+    fi
 
     if (
         set -e
