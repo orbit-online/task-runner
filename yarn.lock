@@ -9,10 +9,10 @@
   dependencies:
     "@orbit-online/task-runner" "1.0.0"
 
-"@orbit-online/package-version@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@orbit-online/package-version/-/package-version-1.0.0.tgz#2da77ad2f67a9ae2c8984ba9c373aef0bb0dcf7c"
-  integrity sha512-e5+T7Fz7nAMxLgVvikhY9VNusQJL0d2/jpfUbrN5nWQBgCGF1uNTm9YEJ3AquD6iZutievaY44ChUpdtG3k12A==
+"@orbit-online/package-version@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@orbit-online/package-version/-/package-version-1.2.1.tgz#765872da80c9045f365bff24828b05e746299fe7"
+  integrity sha512-RtJZJSrebb6z+VD+ENqKZwQZP7mgGdNf6I0ubXk4YY87wX+1LVK5G2maJbUFgxCpxaNuDWuT1NeOmWb2a489wg==
 
 "@orbit-online/task-runner@1.0.0":
   version "1.0.0"
