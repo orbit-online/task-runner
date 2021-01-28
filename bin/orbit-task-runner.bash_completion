@@ -1,0 +1,151 @@
+#!/bin/bash
+
+if [ -z "$_ORB_LOCAL_INVOKE" ]; then
+    _orb_bash_completion () {
+        find_project_root() {
+            local path
+            path="$(pwd)"
+            while [ "$path" != '/' ] ; do
+                if [[ -d "$path/.git" || -f "$path/.env" || -f "$path/package.json" ]]; then
+                    printf -- '%s' "$path"
+                    return 0
+                fi
+                path="$(dirname "$path")"
+            done
+            return 1
+        }
+
+        read_dotenv_file() {
+            local raw_env_line dotenv_file=$1
+            while IFS= read -r raw_env_line; do
+                [[ -z $raw_env_line || $raw_env_line = '#'* ]] && continue
+                eval "export $raw_env_line"
+            done < "$dotenv_file"
+        }
+
+        load_dotenv() {
+            if [ -f "$ORB_PROJECT_PATH/.env" ]; then
+                read_dotenv_file "$ORB_PROJECT_PATH/.env"
+            elif [ -f "$ORB_PROJECT_PATH/config/.env" ]; then
+                read_dotenv_file "$ORB_PROJECT_PATH/config/.env"
+            elif [ -f "$ORB_PROJECT_PATH/config/env" ]; then
+                read_dotenv_file "$ORB_PROJECT_PATH/config/env"
+            elif [ -f "$ORB_PROJECT_PATH/.config/env" ]; then
+                read_dotenv_file "$ORB_PROJECT_PATH/.config/env"
+            elif [ -f "$ORB_PROJECT_PATH/.config/.env" ]; then
+                read_dotenv_file "$ORB_PROJECT_PATH/.config/.env"
+            fi
+        }
+
+        local ORB_PROJECT_PATH=$ORB_PROJECT_PATH
+        if [ -z "$ORB_PROJECT_PATH" ]; then
+            if [ -n "$PROJECT_PATH" ]; then
+                ORB_PROJECT_PATH="$PROJECT_PATH"
+            else
+                ORB_PROJECT_PATH=$(find_project_root)
+            fi
+        fi
+
+        if [ -z "$PROJECT_PATH" ]; then
+            PROJECT_PATH="$ORB_PROJECT_PATH"
+        fi
+
+        ORB_BIN_PATHS=
+        load_dotenv
+
+        if [ -z "$ORB_BIN_PATHS" ]; then
+            ORB_BIN_PATHS=()
+            [ -d "$ORB_PROJECT_PATH/.bin" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/.bin" )
+            [ -d "$ORB_PROJECT_PATH/bin" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/bin" )
+            [ -d "$ORB_PROJECT_PATH/scripts" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/scripts" )
+            [ -d "$ORB_PROJECT_PATH/tasks" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/tasks" )
+            [ -d "$ORB_PROJECT_PATH/tools" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/tools" )
+
+        fi
+
+        if [[ $ORB_NODE_MODULES ]]; then
+            [ -d "$ORB_PROJECT_PATH/node_modules/.bin" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/node_modules/.bin" )
+        fi
+
+        if [[ $ORB_HOME_BIN ]]; then
+            [ -d "$HOME/.local/bin" ] && ORB_BIN_PATHS+=( "$HOME/.local/bin" )
+            [ -d "$HOME/.bin" ] && ORB_BIN_PATHS+=( "$HOME/.bin" )
+            [ -d "$HOME/bin" ] && ORB_BIN_PATHS+=( "$HOME/bin" )
+        fi
+
+        find_tasks() {
+            local maxdepth=${ORB_BIN_PATH_RECURSE:-false} perm task_name=$1 task_path unamestr
+
+            unamestr=$(uname)
+            if [[ $unamestr == 'Darwin' || $unamestr == 'FreeBSD' ]]; then
+                perm='+ugo+x'
+            else
+                perm='/ugo+x'
+            fi
+
+            if $maxdepth; then
+                maxdepth=''
+            else
+                maxdepth="-maxdepth 1"
+            fi
+
+
+            # shellcheck disable=2086
+            find \
+                "${ORB_BIN_PATHS[@]}" \
+                $maxdepth \
+                -perm "$perm" \
+                -name "$task_name*" \
+                -not -type d \
+                -print0
+        }
+
+        complete_tasks() {
+            local task_name=$1 task_path
+
+            # shellcheck disable=2086
+            while IFS= read -r -d $'\0'; do
+                task_path=$(basename "$REPLY")
+                COMPREPLY+=("${task_path%.*}")
+            done < <(find_tasks "$task_name")
+        }
+
+        complete_next_task() {
+            local task_path task_name=$1 task_basename task_dir task_completion
+
+            task_path=$(find_tasks "$task_name" | tr '\0' '\n')
+
+            if [[ -z $task_path ]]; then
+                return 0
+            fi
+
+            if (( $(wc -l <<< "$task_path") > 1 )); then
+                return 0
+            fi
+
+            task_path="$(realpath "$task_path")"
+            task_dir="$(dirname "$task_path")"
+            task_basename="$(basename "${task_path}")"
+            task_completion="${task_basename%.*}.orb_bash_completion"
+
+            if [ -f "${task_dir}/${task_completion}" ]; then
+                # shellcheck disable=SC1090
+                source "${task_dir}/${task_completion}"
+
+                # shellcheck disable=2034
+                _ORB_BASH_COMPLETION=1
+                _exec_orb_bash_completion
+            fi
+
+            return 0
+        }
+
+        if [ "${COMP_CWORD}" -eq "1" ]; then
+            complete_tasks "${COMP_WORDS[1]}"
+        elif [ "${COMP_CWORD}" -ge "1" ]; then
+            complete_next_task "${COMP_WORDS[1]}"
+        fi
+    }
+
+    complete -F _orb_bash_completion orb
+fi

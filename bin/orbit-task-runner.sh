@@ -111,6 +111,11 @@ orb() {
         fi
     fi
 
+    if [ -z "$PROJECT_PATH" ]; then
+        PROJECT_PATH="$ORB_PROJECT_PATH"
+    fi
+
+    ORB_BIN_PATHS=
     load_dotenv
 
     if [ -z "$ORB_BIN_PATHS" ]; then
