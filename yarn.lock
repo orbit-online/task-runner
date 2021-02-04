@@ -2,22 +2,17 @@
 # yarn lockfile v1
 
 
-"@orbit-online/create-task-runner@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@orbit-online/create-task-runner/-/create-task-runner-1.3.0.tgz#d14ceaaefb115e21db546bd049e53c875529ffea"
-  integrity sha512-oup/Ykz1RMkOP4HZMcfhdlUkVJic0XcmGASAcum4Zf7hG7pIMVRHjZ3krj/n24hUC+9UZAHsQPDBrj/uh00RBA==
+"@orbit-online/create-task-runner@^1.4.1":
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/@orbit-online/create-task-runner/-/create-task-runner-1.4.1.tgz#0bf8941de23258fea947b23a5c6b065691612a71"
+  integrity sha512-k9VcF+Yt+l122Sk2o3ogpLxDYol7/5kdtj/IVjUdewdQIP32N2uZY3B7cCfms0y+EwLUZOjRHyqGf0UOFJ3jDA==
   dependencies:
-    "@orbit-online/task-runner" "1.1.0"
+    "@orbit-online/task-runner" "^1.2.0"
 
 "@orbit-online/package-version@^1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@orbit-online/package-version/-/package-version-1.2.1.tgz#765872da80c9045f365bff24828b05e746299fe7"
   integrity sha512-RtJZJSrebb6z+VD+ENqKZwQZP7mgGdNf6I0ubXk4YY87wX+1LVK5G2maJbUFgxCpxaNuDWuT1NeOmWb2a489wg==
-
-"@orbit-online/task-runner@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@orbit-online/task-runner/-/task-runner-1.1.0.tgz#6adb0091f3a6ebc3698c07133fe3bbcd43fe3f37"
-  integrity sha512-QR59BgweXMC+OX1rNhS5GmzIXl6Uu21ZIk9pEMzXdeFMic8xE65rt5OZgDbI0xOrZiMZEuoQvD3zOWzYysXO9w==
 
 "@orbit-online/task-runner@^1.2.0":
   version "1.2.0"
