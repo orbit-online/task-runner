@@ -2,13 +2,13 @@
 
 install_orb() {
     local install_cmd=() task_runner_path task_runner_name=${1:-orb} \
-          task_runner_basename task_runner_dir task_runner_filename
-          prefix=${ORB_INSTALL_PREFIX:-/usr/local/bin}
+          task_runner_dir prefix=${ORB_INSTALL_PREFIX:-/usr/local/bin}
 
     if [[ ! -d $prefix ]]; then
         printf -- '%s is not a directory choose different install prefix by setting the ORB_INSTALL_PREFIX environment variable\n' "$prefix" >&2
         exit 1
     fi
+
     if [ ! -w "$prefix" ]; then
         install_cmd+=( "sudo" )
     fi
@@ -16,14 +16,20 @@ install_orb() {
     task_runner_path="$(realpath "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../node_modules/.bin/orb")"
     install_cmd+=( "cp" "$task_runner_path" "$prefix/$task_runner_name" )
     if [ -d /etc/bash_completion.d/ ]; then
-        task_runner_dir="$(dirname "$task_runner_path")"
-        task_runner_basename="$(basename "$task_runner_path")"
-        task_runner_filename="${task_runner_basename%.*}"
-
+        task_runner_dir="$(dirname "$(dirname "$task_runner_path")")"
         if [ ! -w /etc/bash_completion.d/ ]; then
-            sudo cp "${task_runner_dir}/${task_runner_filename}.bash_completion" /etc/bash_completion.d/orb_completion &> /dev/null || true
+            sudo cp "${task_runner_dir}/completions/bash/orb_completion" /etc/bash_completion.d/orb_completion &> /dev/null || true
         else
-            cp "${task_runner_dir}/${task_runner_filename}.bash_completion" /etc/bash_completion.d/orb_completion &> /dev/null || true
+            cp "${task_runner_dir}/completions/bash/orb_completion" /etc/bash_completion.d/orb_completion &> /dev/null || true
+        fi
+    fi
+
+    if [ -d /usr/share/zsh/vendor-completions/ ]; then
+        task_runner_dir="$(dirname "$(dirname "$task_runner_path")")"
+        if [ ! -w /usr/share/zsh/vendor-completions ]; then
+            sudo cp "${task_runner_dir}/completions/zsh/_orb" /usr/share/zsh/vendor-completions/_orb &> /dev/null || true
+        else
+            cp "${task_runner_dir}/completions/zsh/_orb" /usr/share/zsh/vendor-completions/_orb &> /dev/null || true
         fi
     fi
 

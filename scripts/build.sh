@@ -31,7 +31,8 @@ build-task-runner() {
     mkdir -p "$PROJECT_PATH/packages/$package_name/bin"
     jq "$jq_filter" < package.json > "$PROJECT_PATH/packages/$package_name/package.json"
 
-    cp "$PROJECT_PATH/bin/orbit-task-runner."* "$PROJECT_PATH/packages/$package_name/bin/"
+    cp "$PROJECT_PATH/bin/orbit-task-runner.sh" "$PROJECT_PATH/packages/$package_name/bin/"
+    cp -R "$PROJECT_PATH/completions/" "$PROJECT_PATH/packages/$package_name/completions/"
     cp "$PROJECT_PATH/LICENSE" "$PROJECT_PATH/packages/$package_name"
 }
 

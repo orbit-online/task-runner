@@ -1,0 +1,14 @@
+#!/bin/zsh
+
+if [ -n "$_ORB_ZSH_COMPLETION" ]; then
+    _exec_orb_zsh_completion() {
+        if (( CURRENT == 3 )); then
+            local -a aliases=( \
+                'orb:Default name for task runner' \
+                'dev:Often used when using it for dev tools' \
+            )
+            _describe 'alias' aliases
+        fi
+        return 0
+    }
+fi
