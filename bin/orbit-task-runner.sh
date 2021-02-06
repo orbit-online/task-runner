@@ -13,7 +13,7 @@ orb() {
         return 0
     fi
 
-    find_project_root() {
+    __orb_find_project_root() {
         local path
         path="$(pwd)"
         while [ "$path" != '/' ] ; do
@@ -26,8 +26,9 @@ orb() {
         return 1
     }
 
-    find_tasks() {
-        local maxdepth=${ORB_BIN_PATH_RECURSE:-false} perm task_name=$1 unamestr
+    __orb_find_tasks() {
+        local perm task_name=$1 unamestr
+        local -a find_args=()
 
         unamestr=$(uname)
         if [[ $unamestr == 'Darwin' || $unamestr == 'FreeBSD' ]]; then
@@ -36,37 +37,38 @@ orb() {
             perm='/ugo+x'
         fi
 
-        if $maxdepth; then
-            maxdepth=''
-        else
-            maxdepth="-maxdepth 1"
-        fi
+        ! ${ORB_BIN_PATH_RECURSE:-false} && find_args+=( "-maxdepth 1" )
+        [[ -n "$task_name" && "$task_name" != '*' ]] && find_args+=( "( -name $task_name -o -name $task_name.* )" )
 
+        # Don't show orb as result unless specifically queried after.
+        [[ ! "$task_name" =~ ^orb|\*|o\*|or\*|orb\*$ ]] && find_args+=( "-not -name orb" )
+
+        set -o noglob
         # shellcheck disable=2086
         find \
             "${ORB_BIN_PATHS[@]}" \
-            $maxdepth \
+            ${find_args[*]} \
             -perm "$perm" \
-            \( -name "$task_name" -o -name "$task_name.*" \) \
             -not -type d \
             -print0
+        set +o noglob
     }
 
-    load_dotenv() {
+    __orb_load_dotenv() {
         if [ -f "$ORB_PROJECT_PATH/.env" ]; then
-            read_dotenv_file "$ORB_PROJECT_PATH/.env"
+            __orb_read_dotenv_file "$ORB_PROJECT_PATH/.env"
         elif [ -f "$ORB_PROJECT_PATH/config/.env" ]; then
-            read_dotenv_file "$ORB_PROJECT_PATH/config/.env"
+            __orb_read_dotenv_file "$ORB_PROJECT_PATH/config/.env"
         elif [ -f "$ORB_PROJECT_PATH/config/env" ]; then
-            read_dotenv_file "$ORB_PROJECT_PATH/config/env"
+            __orb_read_dotenv_file "$ORB_PROJECT_PATH/config/env"
         elif [ -f "$ORB_PROJECT_PATH/.config/env" ]; then
-            read_dotenv_file "$ORB_PROJECT_PATH/.config/env"
+            __orb_read_dotenv_file "$ORB_PROJECT_PATH/.config/env"
         elif [ -f "$ORB_PROJECT_PATH/.config/.env" ]; then
-            read_dotenv_file "$ORB_PROJECT_PATH/.config/.env"
+            __orb_read_dotenv_file "$ORB_PROJECT_PATH/.config/.env"
         fi
     }
 
-    read_dotenv_file() {
+    __orb_read_dotenv_file() {
         local raw_env_line dotenv_file=$1
         while IFS= read -r raw_env_line; do
             [[ -z $raw_env_line || $raw_env_line = '#'* ]] && continue
@@ -74,9 +76,9 @@ orb() {
         done < "$dotenv_file"
     }
 
-    get_task_path() {
+    __orb_get_task_path() {
         local task_path task_name=$1
-        task_path=$(find_tasks "$task_name" | tr '\0' '\n')
+        task_path=$(__orb_find_tasks "$task_name" | tr '\0' '\n')
 
         if [[ -z $task_path ]]; then
             printf -- 'Unable to find any tasks matching "%s"\n' "$task_name" >&2
@@ -95,9 +97,9 @@ orb() {
         return 0
     }
 
-    run_task() {
+    __orb_run_task() {
         local task_name=$1 task_path
-        if ! task_path=$(get_task_path "$task_name"); then
+        if ! task_path=$(__orb_get_task_path "$task_name"); then
             return 1
         fi
 
@@ -109,7 +111,7 @@ orb() {
         if [ -n "$PROJECT_PATH" ]; then
             ORB_PROJECT_PATH="$PROJECT_PATH"
         else
-            ORB_PROJECT_PATH=$(find_project_root)
+            ORB_PROJECT_PATH=$(__orb_find_project_root)
             export PROJECT_PATH=$ORB_PROJECT_PATH
         fi
     fi
@@ -118,8 +120,8 @@ orb() {
         PROJECT_PATH="$ORB_PROJECT_PATH"
     fi
 
-    ORB_BIN_PATHS=
-    load_dotenv
+    local -a ORB_BIN_PATHS=
+    __orb_load_dotenv
 
     if [ -z "$ORB_BIN_PATHS" ]; then
         ORB_BIN_PATHS=()
@@ -152,13 +154,19 @@ orb() {
                 _ORB_LOCAL_INVOKE=true "$local_orb" "$@"
             )
             return $?
-        done < <(find_tasks orb)
+        done < <(__orb_find_tasks orb)
     fi
 
-    (
-        set -e
-        run_task "$@"
-    )
+    if [ "$1" == '--list' ]; then
+        ( set -e; __orb_find_tasks "$2" | tr '\0' '\n' )
+    elif [ "$1" == '--env' ]; then
+        local bin_path
+        printf -- 'typeset -- PROJECT_PATH="%q"\n' "$PROJECT_PATH"
+        printf -- 'typeset -- ORB_PROJECT_PATH="%q"\n' "$ORB_PROJECT_PATH"
+        printf -- 'typeset -a ORB_BIN_PATHS=('; for bin_path in "${ORB_BIN_PATHS[@]}"; do printf -- ' "%q"' "$bin_path"; done; printf ' )\n'
+    else
+        ( set -e; __orb_run_task "$@" )
+    fi
 }
 fi
 

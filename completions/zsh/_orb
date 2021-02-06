@@ -2,140 +2,23 @@
 
 if [ -z "$_ORB_LOCAL_INVOKE" ]; then
     _orb() {
-        local ORB_BIN_PATH_RECURSE=${ORB_BIN_PATH_RECURSE:-false} \
-              ORB_BIN_PATHS=${ORB_BIN_PATHS} \
-              ORB_HOME_BIN=${ORB_HOME:-false} \
-              ORB_NODE_MODULES=${ORB_NODE_MODULES:-false} \
-              ORB_PROJECT_PATH=${ORB_PROJECT_PATH} \
-              PROJECT_PATH=${PROJECT_PATH}
-
-        __orb_find_project_root() {
-            local path
-            path="$(pwd)"
-            while [ "$path" != '/' ] ; do
-                if [[ -d "$path/.git" || -f "$path/.env" || -f "$path/package.json" ]]; then
-                    printf -- '%s' "$path"
-                    return 0
-                fi
-                path="$(dirname "$path")"
-            done
-            return 1
-        }
-
-        __orb_read_dotenv_file() {
-            local raw_env_line dotenv_file=$1
-            while IFS= read -r raw_env_line; do
-                [[ -z $raw_env_line || $raw_env_line = '#'* ]] && continue
-                eval "$raw_env_line"
-            done < "$dotenv_file"
-        }
-
-        __orb_load_dotenv() {
-            if [ -f "$ORB_PROJECT_PATH/.env" ]; then
-                __orb_read_dotenv_file "$ORB_PROJECT_PATH/.env"
-            elif [ -f "$ORB_PROJECT_PATH/config/.env" ]; then
-                __orb_read_dotenv_file "$ORB_PROJECT_PATH/config/.env"
-            elif [ -f "$ORB_PROJECT_PATH/config/env" ]; then
-                __orb_read_dotenv_file "$ORB_PROJECT_PATH/config/env"
-            elif [ -f "$ORB_PROJECT_PATH/.config/env" ]; then
-                __orb_read_dotenv_file "$ORB_PROJECT_PATH/.config/env"
-            elif [ -f "$ORB_PROJECT_PATH/.config/.env" ]; then
-                __orb_read_dotenv_file "$ORB_PROJECT_PATH/.config/.env"
-            fi
-        }
-
-        if [ -z "$ORB_PROJECT_PATH" ]; then
-            if [ -n "$PROJECT_PATH" ]; then
-                ORB_PROJECT_PATH="$PROJECT_PATH"
-            else
-                ORB_PROJECT_PATH=$(__orb_find_project_root)
-            fi
-        fi
-
-        if [ -z "$PROJECT_PATH" ]; then
-            PROJECT_PATH="$ORB_PROJECT_PATH"
-        fi
-
-        __orb_load_dotenv
-
-        if [ -z "$ORB_BIN_PATHS" ]; then
-            ORB_BIN_PATHS=()
-            [ -d "$ORB_PROJECT_PATH/.bin" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/.bin" )
-            [ -d "$ORB_PROJECT_PATH/bin" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/bin" )
-            [ -d "$ORB_PROJECT_PATH/scripts" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/scripts" )
-            [ -d "$ORB_PROJECT_PATH/tasks" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/tasks" )
-            [ -d "$ORB_PROJECT_PATH/tools" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/tools" )
-        fi
-
-        if $ORB_NODE_MODULES; then
-            [ -d "$ORB_PROJECT_PATH/node_modules/.bin" ] && ORB_BIN_PATHS+=( "$ORB_PROJECT_PATH/node_modules/.bin" )
-        fi
-
-        if $ORB_HOME_BIN; then
-            [ -d "$HOME/.local/bin" ] && ORB_BIN_PATHS+=( "$HOME/.local/bin" )
-            [ -d "$HOME/.bin" ] && ORB_BIN_PATHS+=( "$HOME/.bin" )
-            [ -d "$HOME/bin" ] && ORB_BIN_PATHS+=( "$HOME/bin" )
-        fi
-
-        __orb_find_tasks() {
-            local perm task_path unamestr
-            local -a maxdepth=()
-
-            unamestr=$(uname)
-            if [[ $unamestr == 'Darwin' || $unamestr == 'FreeBSD' ]]; then
-                perm='+ugo+x'
-            else
-                perm='/ugo+x'
-            fi
-
-            if ${ORB_BIN_PATH_RECURSE:-false}; then
-                maxdepth=()
-            else
-                maxdepth=( "-maxdepth" "1" )
-            fi
-
-            if [ -z "$1" ]; then
-                # shellcheck disable=2086
-                find \
-                    "${ORB_BIN_PATHS[@]}" \
-                    "${maxdepth[@]}" \
-                    -perm "$perm" \
-                    -not -type d \
-                    -print0
-            else
-                # shellcheck disable=2086
-                find \
-                    "${ORB_BIN_PATHS[@]}" \
-                    "${maxdepth[@]}" \
-                    -perm "$perm" \
-                    \( -name "$1" -o -name "$1.*" \) \
-                    -not -type d \
-                    -print0
-            fi
-        }
-
         local -a tasks=()
+
         __orb_complete_tasks() {
             local task_path
-
-            # shellcheck disable=2086
-            while IFS= read -r -d $'\0'; do
+            while IFS= read -r; do
                 task_path=$(basename "$REPLY")
                 tasks+=("${task_path%.*}:${REPLY#$PWD/}")
-            done < <(__orb_find_tasks)
+            done < <(orb --list)
         }
 
         __orb_complete_next_task() {
-            local task_path task_name=$1 task_basename task_dir task_completion
-            task_path=$(__orb_find_tasks "$task_name" | tr '\0' '\n')
+            local task_basename task_completion \
+                  task_dir task_name=$1 task_path
 
-            if [[ -z $task_path ]]; then
-                return 0
-            fi
-
-            if (( $(wc -l <<< "$task_path" ) > 1 )); then
-                return 0
-            fi
+            task_path=$(orb --list "$task_name" | tr '\0' '\n')
+            [[ -z $task_path ]] && return 0
+            (( $(wc -l <<< "$task_path" ) > 1 )) && return 0
 
             task_path="$(realpath "$task_path")"
             task_dir="$(dirname "$task_path")"
@@ -143,13 +26,14 @@ if [ -z "$_ORB_LOCAL_INVOKE" ]; then
             task_completion="${task_basename%.*}.orb_zsh_completion"
 
             if [ -f "${task_dir}/${task_completion}" ]; then
-                # shellcheck disable=SC2034
-                _ORB_ZSH_COMPLETION=1
+                eval "$(orb --env)"
                 # shellcheck disable=SC1090
-                source "${task_dir}/${task_completion}"
-                _exec_orb_zsh_completion
+                _ORB_ZSH_COMPLETION=1 source "${task_dir}/${task_completion}" && \
+                _exec_orb_zsh_completion; \
                 unset _exec_orb_zsh_completion
             fi
+
+            return 0
         }
 
         if (( CURRENT == 2)); then
@@ -159,6 +43,8 @@ if [ -z "$_ORB_LOCAL_INVOKE" ]; then
             # shellcheck disable=SC2154
             __orb_complete_next_task "${words[2]}"
         fi
+
+        return 0
     }
 
     _orb
