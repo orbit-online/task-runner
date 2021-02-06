@@ -14,6 +14,11 @@
   resolved "https://registry.yarnpkg.com/@orbit-online/package-version/-/package-version-1.3.4.tgz#62d0a71a583ea730d7e86f4cd24b487ab780d529"
   integrity sha512-cBukt+/AnUaiZd/5mQ36sLLQpHGYCRHdRIGshegLyAnWmMG5wxbQpcDntnDEzZlphe/MrHGxyWLh6TuqgYplrg==
 
+"@orbit-online/task-runner@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@orbit-online/task-runner/-/task-runner-2.0.0.tgz#9f82e116394488bd301cc9fa4d8479b0efff166a"
+  integrity sha512-Ugclp4FQ8fc92srBzGvC/QHSvOLR8WVgF0WaiwRPb1GrqknFH4LXGXRAT+4Uwu48cSuPyuyrVshGZhOLPW5gSg==
+
 "@orbit-online/task-runner@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@orbit-online/task-runner/-/task-runner-1.2.0.tgz#b0517b8421a85097d86b0f09a2b9a2948e0767d3"
