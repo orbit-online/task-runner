@@ -4,12 +4,13 @@ install_orb() {
     local install_cmd=() task_runner_path task_runner_name=${1:-orb} \
           task_runner_dir prefix=${ORB_INSTALL_PREFIX:-/usr/local/bin}
 
-    if [[ ! -d $prefix ]]; then
+    if [[ "$1" == '--version' ]]; then
+        printf -- 'v__VERSION__\n'
+        return 0
+    elif [[ ! -d $prefix ]]; then
         printf -- '%s is not a directory choose different install prefix by setting the ORB_INSTALL_PREFIX environment variable\n' "$prefix" >&2
-        exit 1
-    fi
-
-    if [ ! -w "$prefix" ]; then
+        return 1
+    elif [ ! -w "$prefix" ]; then
         install_cmd+=( "sudo" )
     fi
 

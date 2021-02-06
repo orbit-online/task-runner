@@ -10,28 +10,32 @@ fi
 PROJECT_PATH=$(cd -P "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 
 build-create-task-runner() {
-    local jq_filter package_version package_name='create-task-runner'
+    local jq_filter package_version package_name='create-task-runner' sed_replace
     package_version="$(head -n1 < "$PROJECT_PATH/packages/$package_name/VERSION")"
 
     read -r jq_filter <<< "$(printf -- '.name="@orbit-online/%s" | .version="%s" | del(.devDependencies,.bin.orb,.private)' "$package_name" "$package_version")"
+    read -r sed_replace <<< "$(printf -- 's/v__VERSION__/v%s/' "$package_version")"
 
     mkdir -p "$PROJECT_PATH/packages/$package_name/bin"
     jq "$jq_filter" < package.json > "$PROJECT_PATH/packages/$package_name/package.json"
 
     cp "$PROJECT_PATH/bin/install-task-runner."* "$PROJECT_PATH/packages/$package_name/bin/"
+    sed -i "$sed_replace" "$PROJECT_PATH/packages/$package_name/bin/install-task-runner.sh"
     cp "$PROJECT_PATH/LICENSE" "$PROJECT_PATH/packages/$package_name"
 }
 
 build-task-runner() {
-    local jq_filter package_version package_name='task-runner'
+    local jq_filter package_version package_name='task-runner' sed_replace
     package_version="$(head -n1 < "$PROJECT_PATH/packages/$package_name/VERSION")"
 
     read -r jq_filter <<< "$(printf -- '.name="@orbit-online/%s" | .version="%s" | del(.dependencies,.devDependencies,.bin."create-task-runner",.private)' "$package_name" "$package_version")"
+    read -r sed_replace <<< "$(printf -- 's/v__VERSION__/v%s/' "$package_version")"
 
     mkdir -p "$PROJECT_PATH/packages/$package_name/bin"
     jq "$jq_filter" < package.json > "$PROJECT_PATH/packages/$package_name/package.json"
 
     cp "$PROJECT_PATH/bin/orbit-task-runner.sh" "$PROJECT_PATH/packages/$package_name/bin/"
+    sed -i "$sed_replace" "$PROJECT_PATH/packages/$package_name/bin/orbit-task-runner.sh"
     cp -R "$PROJECT_PATH/completions/" "$PROJECT_PATH/packages/$package_name/completions/"
     cp "$PROJECT_PATH/LICENSE" "$PROJECT_PATH/packages/$package_name"
 }

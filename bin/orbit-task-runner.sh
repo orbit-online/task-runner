@@ -8,6 +8,9 @@ orb() {
     if [ -z "$1" ]; then
         printf -- 'Usage: orb TASK [ TASKARGS... ]\n' >&2
         return 1
+    elif [[ "$1" == '--version' ]]; then
+        printf -- 'v__VERSION__\n'
+        return 0
     fi
 
     find_project_root() {
