@@ -167,7 +167,6 @@ orb() {
             fi
 
             break
-            return $?
         done < <(__orb_find_tasks orb)
         if [ -n "$local_orb" ]; then
             ( set -e; _ORB_LOCAL_INVOKE=true "$local_orb" "$@" )
@@ -185,6 +184,7 @@ orb() {
         __orb_typeset_dotenv
     else
         ( set -e; __orb_run_task "$@" )
+        return $?
     fi
 }
 fi
