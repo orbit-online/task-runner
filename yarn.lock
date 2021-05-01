@@ -18,3 +18,8 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@orbit-online/task-runner/-/task-runner-2.0.0.tgz#9f82e116394488bd301cc9fa4d8479b0efff166a"
   integrity sha512-Ugclp4FQ8fc92srBzGvC/QHSvOLR8WVgF0WaiwRPb1GrqknFH4LXGXRAT+4Uwu48cSuPyuyrVshGZhOLPW5gSg==
+
+"@orbit-online/task-runner@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@orbit-online/task-runner/-/task-runner-2.0.1.tgz#457e5fa4611f9a29d41bfaad3775838b50510831"
+  integrity sha512-QXkmfj4zPCsehtBdrTJICE7N+i5V1LhI/6Pcyak5lBKwjVpvUOhPx2IuuLBJeLH15yYNBoFDiQ53Grr4zzcZOA==
