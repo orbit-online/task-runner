@@ -76,6 +76,22 @@ orb() {
         done < "$dotenv_file"
     }
 
+    __orb_typeset_dotenv() {
+        __orb_read_dotenv_file() {
+            local raw_env_line dotenv_file=$1
+            while IFS= read -r raw_env_line; do
+                [[ -z $raw_env_line || \
+                      $raw_env_line == '#'* || \
+                      $raw_env_line == 'ORB_BIN_PATHS='* || \
+                      $raw_env_line == 'ORB_PROJECT_PATH='* || \
+                      $raw_env_line == 'PROJECT_PATH='* \
+                ]] && continue
+                printf -- "typeset -- %s\n" "$raw_env_line"
+            done < "$dotenv_file"
+        }
+        __orb_load_dotenv
+    }
+
     __orb_get_task_path() {
         local task_path task_name=$1
         task_path=$(__orb_find_tasks "$task_name" | tr '\0' '\n')
@@ -146,15 +162,17 @@ orb() {
         local local_orb
         while IFS= read -r -d '' local_orb; do
             if [ "$(realpath "$local_orb")" = "$(realpath "${BASH_SOURCE[0]}")" ]; then
+                local_orb=
                 break
             fi
 
-            (
-                set -e
-                _ORB_LOCAL_INVOKE=true "$local_orb" "$@"
-            )
+            break
             return $?
         done < <(__orb_find_tasks orb)
+        if [ -n "$local_orb" ]; then
+            ( set -e; _ORB_LOCAL_INVOKE=true "$local_orb" "$@" )
+            return $?
+        fi
     fi
 
     if [ "$1" == '--list' ]; then
@@ -164,6 +182,7 @@ orb() {
         printf -- 'typeset -- PROJECT_PATH="%q"\n' "$PROJECT_PATH"
         printf -- 'typeset -- ORB_PROJECT_PATH="%q"\n' "$ORB_PROJECT_PATH"
         printf -- 'typeset -a ORB_BIN_PATHS=('; for bin_path in "${ORB_BIN_PATHS[@]}"; do printf -- ' "%q"' "$bin_path"; done; printf ' )\n'
+        __orb_typeset_dotenv
     else
         ( set -e; __orb_run_task "$@" )
     fi
